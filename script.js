@@ -16,7 +16,7 @@ const conversationHistory = [
 ];
 
 // Set initial message
-chatWindow.textContent = "👋 Hello! How can I help you today?";
+chatWindow.innerHTML = '<div class="msg ai">👋 Hello! How can I help you today?</div>';
 
 /* Handle form submit */
 chatForm.addEventListener("submit", async (e) => {
@@ -24,6 +24,9 @@ chatForm.addEventListener("submit", async (e) => {
 
   // Get the user's question
   const userQuestion = userInput.value.trim();
+  
+  // Don't submit if empty
+  if (!userQuestion) return;
 
   // Add user message to conversation history
   conversationHistory.push({
@@ -89,20 +92,17 @@ chatForm.addEventListener("submit", async (e) => {
       content: aiResponse,
     });
 
-    // Remove the "Thinking..." message and display the AI's response
-    const messages = chatWindow.querySelectorAll(".msg");
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage && lastMessage.textContent === "Thinking...") {
-      lastMessage.textContent = aiResponse;
-    }
+    // Update the chat window with both user question and AI response
+    chatWindow.innerHTML = `
+      <div class="msg user">${userQuestion}</div>
+      <div class="msg ai">${aiResponse}</div>
+    `;
   } catch (error) {
-    // Handle any errors
-    const messages = chatWindow.querySelectorAll(".msg");
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage && lastMessage.textContent === "Thinking...") {
-      lastMessage.textContent =
-        "Sorry, there was an error connecting to the API. Please try again.";
-    }
+    // Handle any errors - show error message in chat
+    chatWindow.innerHTML = `
+      <div class="msg user">${userQuestion}</div>
+      <div class="msg ai">Sorry, there was an error connecting to the API. Please try again.</div>
+    `;
     console.error("Error details:", error);
   }
 });
