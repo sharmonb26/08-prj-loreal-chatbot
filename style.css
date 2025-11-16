@@ -184,6 +184,21 @@ body {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
+/* Voice button active state */
+.chat-form button#voiceBtn.listening {
+  background: linear-gradient(135deg, #E3A535 0%, #d4941f 100%);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(227, 165, 53, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(227, 165, 53, 0.8);
+  }
+}
+
 .chat-form button:focus {
   outline: 2px solid #000;
   outline-offset: 2px;

@@ -2,6 +2,7 @@
 const chatForm = document.getElementById("chatForm");
 const userInput = document.getElementById("userInput");
 const chatWindow = document.getElementById("chatWindow");
+const voiceBtn = document.getElementById("voiceBtn");
 
 // Cloudflare Worker URL
 const WORKER_URL = "https://lorealchatbot.sharmonb.workers.dev";
@@ -18,6 +19,45 @@ const conversationHistory = [
 // Set initial message
 chatWindow.innerHTML =
   '<div class="msg ai">👋 Hello! How can I help you today?</div>';
+
+/* Voice input setup */
+let recognition = null;
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    userInput.value = transcript;
+    voiceBtn.classList.remove('listening');
+  };
+
+  recognition.onerror = (event) => {
+    console.error('Speech recognition error:', event.error);
+    voiceBtn.classList.remove('listening');
+  };
+
+  recognition.onend = () => {
+    voiceBtn.classList.remove('listening');
+  };
+
+  // Voice button click handler
+  voiceBtn.addEventListener('click', () => {
+    if (voiceBtn.classList.contains('listening')) {
+      recognition.stop();
+      voiceBtn.classList.remove('listening');
+    } else {
+      recognition.start();
+      voiceBtn.classList.add('listening');
+    }
+  });
+} else {
+  // Hide voice button if speech recognition not supported
+  voiceBtn.style.display = 'none';
+}
 
 /* Handle form submit */
 chatForm.addEventListener("submit", async (e) => {
