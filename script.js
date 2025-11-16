@@ -16,7 +16,8 @@ const conversationHistory = [
 ];
 
 // Set initial message
-chatWindow.innerHTML = '<div class="msg ai">👋 Hello! How can I help you today?</div>';
+chatWindow.innerHTML =
+  '<div class="msg ai">👋 Hello! How can I help you today?</div>';
 
 /* Handle form submit */
 chatForm.addEventListener("submit", async (e) => {
@@ -24,7 +25,7 @@ chatForm.addEventListener("submit", async (e) => {
 
   // Get the user's question
   const userQuestion = userInput.value.trim();
-  
+
   // Don't submit if empty
   if (!userQuestion) return;
 
@@ -34,14 +35,17 @@ chatForm.addEventListener("submit", async (e) => {
     content: userQuestion,
   });
 
-  // Clear chat window and display only the current user's question
-  chatWindow.innerHTML = `<div class="msg user">${userQuestion}</div>`;
+  // Add user message to chat window (keep all previous messages)
+  chatWindow.innerHTML += `<div class="msg user">${userQuestion}</div>`;
 
   // Clear the input field
   userInput.value = "";
 
   // Show loading message
   chatWindow.innerHTML += `<div class="msg ai">Thinking...</div>`;
+
+  // Auto-scroll to bottom to show latest message
+  chatWindow.scrollTop = chatWindow.scrollHeight;
 
   try {
     console.log("Sending request to:", WORKER_URL);
@@ -92,17 +96,23 @@ chatForm.addEventListener("submit", async (e) => {
       content: aiResponse,
     });
 
-    // Update the chat window with both user question and AI response
-    chatWindow.innerHTML = `
-      <div class="msg user">${userQuestion}</div>
-      <div class="msg ai">${aiResponse}</div>
-    `;
+    // Replace "Thinking..." with actual AI response
+    const messages = chatWindow.querySelectorAll(".msg");
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.textContent === "Thinking...") {
+      lastMessage.textContent = aiResponse;
+    }
+
+    // Auto-scroll to bottom to show latest message
+    chatWindow.scrollTop = chatWindow.scrollHeight;
   } catch (error) {
-    // Handle any errors - show error message in chat
-    chatWindow.innerHTML = `
-      <div class="msg user">${userQuestion}</div>
-      <div class="msg ai">Sorry, there was an error connecting to the API. Please try again.</div>
-    `;
+    // Handle any errors - replace "Thinking..." with error message
+    const messages = chatWindow.querySelectorAll(".msg");
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.textContent === "Thinking...") {
+      lastMessage.textContent =
+        "Sorry, there was an error connecting to the API. Please try again.";
+    }
     console.error("Error details:", error);
   }
 });
